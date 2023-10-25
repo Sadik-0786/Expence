@@ -16,7 +16,7 @@ factory UserModel.fromMap(Map<String,dynamic> map){
 }
 Map<String,dynamic>toMap(){
   return
-    {AppDatabase().userColumnEmail:userEmail,
+    { AppDatabase().userColumnEmail:userEmail,
       AppDatabase().userColumnPassword:userPassword,
       AppDatabase().userColumnName:userName,
     };

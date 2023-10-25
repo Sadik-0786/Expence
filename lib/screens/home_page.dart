@@ -16,13 +16,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String totalDebitAmt='00.0';
+  String totalCreditAmt='00.0';
   var data= AppConsts.appTransactions;
   List<FilterDateModel> arrFilteredDateExpense=[];
 @override
   void initState() {
     super.initState();
+    //assigningValue();
     context.read<ExpenseBloc>().add(FetchAllExpenseEvent());
   }
+  /*assigningValue()async{
+  totalAmt=await totalAmtFun();
+  setState(() {
+
+  });
+  }*/
   String dateTimeToday(){
     DateTime dateNow = DateTime.now();
     String formattedDate = "${dateNow.year}${dateNow.month
@@ -41,6 +50,7 @@ class _HomePageState extends State<HomePage> {
         .length < 2 ? '-0${dateNow.day}' : '-${dateNow.day}'}";
     return formattedDate;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +63,7 @@ class _HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   InkWell(
-                    onTap: (){
+                    onTap: () async {
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>AddExpense(userEmail:widget.emailId!)));
                     },
                     child: Container(
@@ -70,20 +80,41 @@ class _HomePageState extends State<HomePage> {
               ),
               Expanded(
                 flex: 1,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Spend this week',style:AppSubHeadings.appSubHeading,),
-                    Row(
+                    Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text('\$',style:  TextStyle(color: Colors.grey.shade400,fontSize: 35),),
-                        const Text('295',style: TextStyle(color: Colors.black,fontSize: 55),),
-                        const Text('.95',style:  TextStyle(color: Colors.black,fontSize: 35),)
+                        Text('Total Debit So Far ',style:AppSubHeadings.appSubHeading,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('\$',style:  TextStyle(color: Colors.grey.shade400,fontSize: 35),),
+                            Text(totalDebitAmt,style: const TextStyle(color: Colors.black,fontSize: 55),),
+                            //const Text('.00',style:  TextStyle(color: Colors.black,fontSize: 35),)
+                          ],
+                        )
                       ],
-                    )
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text('Total Credit So Far ',style:AppSubHeadings.appSubHeading,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('\$',style:  TextStyle(color: Colors.grey.shade400,fontSize: 35),),
+                            Text(totalCreditAmt,style: const TextStyle(color: Colors.black,fontSize: 55),),
+                            //const Text('.00',style:  TextStyle(color: Colors.black,fontSize: 35),)
+                          ],
+                        )
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -160,7 +191,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-  void filteringExpensesByDate(List<ExpenseModel>data){
+  Future<void> filteringExpensesByDate(List<ExpenseModel>data) async {
   arrFilteredDateExpense.clear();
   //step 1 : getUniqueDate
     List<String> arrUniqueDate=[];
@@ -191,8 +222,41 @@ class _HomePageState extends State<HomePage> {
               }
             }//end if
           }//end second loop
-          arrFilteredDateExpense.add(FilterDateModel(date: date, amt:amt.toString(), arrExpense:transInEachDate ));
+          arrFilteredDateExpense.add(FilterDateModel(date: date, amt:amt, arrExpense:transInEachDate ));
         }//end first loop
       //just for checking
+    totalDebitAmt=await totalDebitAmtFun();
+      totalCreditAmt=await totalCreditAmtFun();
+      setState(() {
+
+      });
     }
+    Future<String> totalDebitAmtFun()  async {
+    num mTotalAmt=0;
+    for(int mIndex=0;mIndex<arrFilteredDateExpense.length;mIndex++){
+     for(int mSubIndex=0;mSubIndex<arrFilteredDateExpense[mIndex].arrExpense.length;mSubIndex++){
+       if(arrFilteredDateExpense[mIndex].arrExpense[mSubIndex].expenseType==0){
+         mTotalAmt+=arrFilteredDateExpense[mIndex].arrExpense[mSubIndex].expenseAmt;
+       }
+     }
+    }
+    if(mTotalAmt!=0){
+     return mTotalAmt.toString();
+    }
+    return '00.0';
+    }
+    Future<String> totalCreditAmtFun() async {
+    num mTotalAmt=0;
+    for(int mIndex=0;mIndex<arrFilteredDateExpense.length;mIndex++){
+      for(int mSubIndex=0;mSubIndex<arrFilteredDateExpense[mIndex].arrExpense.length;mSubIndex++){
+        if(arrFilteredDateExpense[mIndex].arrExpense[mSubIndex].expenseType==1){
+          mTotalAmt+=arrFilteredDateExpense[mIndex].arrExpense[mSubIndex].expenseAmt;
+        }
+      }
+    }
+    if(mTotalAmt!=0){
+      return mTotalAmt.toString();
+    }
+    return '00.0';
+  }
 }

@@ -278,7 +278,7 @@ class _SignUpPageState extends State<SignUpPage> {
           gap(height: 30),
           Row(
             children: [
-              Icon(Icons.email),
+              const Icon(Icons.email),
               Text(
                 'Help@${AppConsts.appName}.com',
                 style: AppHeadings.hading3,
